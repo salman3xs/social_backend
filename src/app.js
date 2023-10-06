@@ -6,9 +6,6 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 
 export default class App {
-    app;
-    port;
-
     constructor(port) {
         this.app = express();
         this.port = port;
