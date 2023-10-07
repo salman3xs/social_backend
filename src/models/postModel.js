@@ -4,7 +4,7 @@ const postModel = new Schema({
     id: String,
     author: String,
     content: String,
-    tags: Array,
+    img: String,
     mentionedUsers: Array,
 });
 

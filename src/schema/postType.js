@@ -14,7 +14,7 @@ export const PostType = new GraphQLObjectType({
             }
         },
         content: { type: GraphQLString },
-        tags: { type: GraphQLList(GraphQLString) },
+        img: { type: GraphQLString },
         mentionedUsers: {
             type: GraphQLList(UserType), resolve(parent, args) {
                 var data = [];

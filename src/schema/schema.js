@@ -12,24 +12,22 @@ const RootQuery = new GraphQLObjectType({
             args: {
                 userId: { type: new GraphQLNonNull(GraphQLID) }
             },
-            resolve(parent, args) {
-                const user = userModel.findOne({ id: args.userId });
+            async resolve(parent, args) {
+                const user = await userModel.findOne({ id: args.userId });
                 if (user) {
                     var data = [];
-                    const selfPost = postModel.find({ author: args.userId });
-                    if (selfPost.length > 0) {
+                    const selfPost = await postModel.find({ author: args.userId });
+                    if (selfPost.length) {
                         data = [...selfPost];
-                        for (let i = 0; i < user.following.length; i++) {
-                            const u = user.following[i];
-                            console.log(u);
-                            // const post = lodash.filter(posts, { author: u });
-                            const post = postModel.filter({ author: u });
+                    }
+                    for (let i = 0; i < user.following.length; i++) {
+                        const u = user.following[i];
+                        const post = await postModel.find({ author: u });
+                        if (post.length) {
                             data = [...data, ...post];
                         }
-                        return data;
-                    } else {
-                        return [];
                     }
+                    return data;
                 } else {
                     return [];
                 }
@@ -50,6 +48,13 @@ const RootQuery = new GraphQLObjectType({
                 id: { type: new GraphQLNonNull(GraphQLID) }
             }, resolve(parent, args) {
                 return userModel.findOne({ id: args.id })
+            }
+        },
+        allUser: {
+            type: GraphQLList(UserType),
+            args: {},
+            resolve(parent, args) {
+                return userModel.find()
             }
         }
     }
@@ -80,7 +85,7 @@ const Mutation = new GraphQLObjectType({
                 id: { type: new GraphQLNonNull(GraphQLID) },
                 author: { type: new GraphQLNonNull(GraphQLID) },
                 content: { type: new GraphQLNonNull(GraphQLString) },
-                tags: { type: new GraphQLNonNull(GraphQLList(GraphQLString)) },
+                img: { type: GraphQLString },
                 mentionedUsers: { type: new GraphQLNonNull(GraphQLList(GraphQLString)) },
             },
             resolve(parent, args) {
@@ -88,10 +93,26 @@ const Mutation = new GraphQLObjectType({
                     id: args.id,
                     author: args.author,
                     content: args.content,
-                    tags: args.tags,
+                    img: args.img,
                     mentionedUsers: args.mentionedUsers
                 });
                 return post.save();
+            }
+        },
+        follow: {
+            type: UserType,
+            args: {
+                userId: { type: new GraphQLNonNull(GraphQLID) },
+                otherUserId: { type: new GraphQLNonNull(GraphQLID) }
+            },
+            async resolve(parent, args) {
+                let user = await userModel.findOne({ id: args.userId });
+                if (!user.following.includes(args.otherUserId)) {
+                    user.following = [...user.following, args.otherUserId];
+                } else {
+                    user.following = user.following.filter((v) => v != args.otherUserId);
+                }
+                return user.save({ isNew: false });
             }
         }
     }
