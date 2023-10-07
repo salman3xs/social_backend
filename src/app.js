@@ -5,37 +5,52 @@ import cors from 'cors';
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 
+// Export the App class
 export default class App {
     constructor(port) {
-        this.app = express();
-        this.port = port;
-        this.connectToDataBases();
-        this.initialize();
+      // Create an Express instance
+      this.app = express();
+  
+      // Set the port to listen on
+      this.port = port;
+  
+      // Connect to the database
+      this.connectToDataBases();
+  
+      // Initialize the Express application
+      this.initialize();
     }
-
+  
     initialize() {
-        this.app.use(cors({
-            origin: ['*']
-        }));
-        this.app.use(bodyParser.json())
-        this.app.use(bodyParser.urlencoded({ extended: true }));
-        this.app.use(
-            "/graphql",
-            graphqlHTTP({
-                schema: schemaql,
-                graphiql: true,
-            })
-        );
+      // Use CORS middleware to allow cross-origin requests
+      this.app.use(cors({
+        origin: ['*']
+      }));
+  
+      // Use BodyParser middleware to parse JSON and URL-encoded requests
+      this.app.use(bodyParser.json());
+      this.app.use(bodyParser.urlencoded({ extended: true }));
+  
+      // Mount the GraphQL API server on the Express application
+      this.app.use(
+        "/graphql",
+        graphqlHTTP({
+          schema: schemaql,
+          graphiql: true,
+        })
+      );
     }
-
+  
     connectToDataBases() {
-        const uri = "mongodb+srv://social_app:7aO1exGq2hhubF4i@cluster0.yfrcavj.mongodb.net/?retryWrites=true&w=majority";
-        mongoose.connect(uri);
+      // Connect to the MongoDB database
+      const uri = "mongodb+srv://social_app:7aO1exGq2hhubF4i@cluster0.yfrcavj.mongodb.net/?retryWrites=true&w=majority";
+      mongoose.connect(uri);
     }
-
+  
     listen() {
-        this.app.listen(this.port, () => {
-            console.log("Running a GraphQL API server at http://localhost:4000/graphql")
-        });
+      // Start the Express server
+      this.app.listen(this.port, () => {
+        console.log("Running a GraphQL API server at http://localhost:4000/graphql");
+      });
     }
-}
+  }
